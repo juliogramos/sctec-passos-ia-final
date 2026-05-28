@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from pandas import DataFrame
 
 
@@ -20,3 +21,11 @@ def outlier_calc(df: DataFrame, coluna: str):
     limite_superior = Q3 + 1.5 * IQR
     outliers = df[(df[coluna] < limite_inferior) | (df[coluna] > limite_superior)]
     return len(outliers), len(outliers) / len(df) * 100
+
+
+def plot_params_and_show(title: str, xlabel: str, ylabel: str, rotation: int):
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.xticks(rotation=rotation)
+    plt.show()

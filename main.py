@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from utilitarios import outlier_calc, ver_tabela_nulos
+from utilitarios import outlier_calc, plot_params_and_show, ver_tabela_nulos
 
 # Carregando o arquivo
 df = pd.read_csv(
@@ -137,3 +137,120 @@ print(
 # Por enquanto, não vou remover nenhum outlier, pois eles podem ter correlações
 # importantes para a modelagem preditiva.
 # Irei checar essas correlações no próximo passo.
+
+# Análise exploratória
+print("ANÁLISE EXPLORATÓRIA:")
+
+# Matriz de correlações
+df_corr = df[numeric_features].copy()
+correlation_matrix = df_corr.corr()
+print("Matriz de correlação:")
+print(correlation_matrix.round(4), "\n")
+
+plt.figure(figsize=(10, 10))
+sns.heatmap(
+    correlation_matrix,
+    annot=True,
+    fmt=".2f",
+    cmap="coolwarm",
+    linewidths=0.5,
+    cbar=True,
+)
+plt.title("Matriz de correlação de features numéricas")
+plt.show()
+
+# Correlações interessantes encontradas:
+# 1. stays_in_weekend_nights com stays_in_week_nights
+# 2. children e adults com adr
+
+# Relações a serem examinadas:
+# 1. cancelamento por lead time
+df_lead_time = df.groupby("lead_time")
+df_lead_time.size().plot(kind="hist")
+plot_params_and_show("Distribuição de lead times", "Lead time", "Quantidade", 45)
+
+df_lead_time["is_canceled"].sum().plot(kind="hist")
+plot_params_and_show("Cancelamento por lead time", "Lead time", "Cancelamento", 45)
+
+# 2. cancelamento por tipo de hotel
+df_tipo_hotel = df.groupby("hotel")
+df_tipo_hotel.size().plot(kind="pie")
+plot_params_and_show(
+    "Distribuição de tipos de hotel", "Tipo do hotel", "Quantidade", 45
+)
+
+df_tipo_hotel["is_canceled"].sum().plot(kind="bar")
+plot_params_and_show(
+    "Cancelamento por tipo do hotel", "Tipo do hotel", "Cancelamento", 45
+)
+
+# 3. cancelamento por mês
+# Gambiarra para mostrar os meses em ordem no gráfico
+# Essa feature nova não vai para as features de ML
+num_para_mes_map = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
+}
+
+mes_para_num_map = {
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
+    "May": 5,
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12,
+}
+
+df["MY_mes_numero"] = df["arrival_date_month"].map(mes_para_num_map)
+
+df_meses = df.sort_values(["MY_mes_numero"], ascending=True).groupby("MY_mes_numero")
+df_meses.size().plot(kind="bar").set_xticklabels(list(num_para_mes_map.values()))
+plot_params_and_show("Distribuição de meses", "Mês", "Quantidade", 45)
+
+df_meses["is_canceled"].sum().plot(kind="bar").set_xticklabels(
+    list(num_para_mes_map.values())
+)
+plot_params_and_show("Cancelamento por mês", "Tipo do hotel", "Cancelamento", 45)
+
+# 4. cancelamento por adr
+df_adr = df.groupby("adr")
+df_adr.size().plot(kind="hist")
+plot_params_and_show("Distribuição de ADR", "ADR", "Quantidade", 45)
+
+df_adr["is_canceled"].sum().plot(kind="hist")
+plot_params_and_show("Cancelamento por ADR", "ADR", "Cancelamento", 45)
+
+print("10 ADRs com mais cancelamentos:")
+print(df_adr["is_canceled"].sum().nlargest(10).head(), "\n")
+
+# 5. cancelamento por país
+df_paises = df.groupby("country")
+df_paises.size().nlargest(10).plot(kind="bar")
+plot_params_and_show("Top 10 Países com mais Reservas", "País", "Reservas", 45)
+
+df_paises["is_canceled"].sum().nlargest(10).plot(kind="bar")
+plot_params_and_show(
+    "Top 10 Países com mais Cancelamentos", "País", "Cancelamentos", 45
+)
+
+# 6. cancelamento por is_repeated_guest
+# 7. cancelamento por previous_cancelations
+# 8. cancelamento por booking_changes
+# 9. cancelamento por days_in_waiting_list
+# 9. cancelamento por total_of special requests
