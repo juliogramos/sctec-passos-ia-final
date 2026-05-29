@@ -169,6 +169,26 @@ plt.show()
 df_lead_time = df.groupby("lead_time")
 df_lead_time.size().plot(kind="line")
 plot_params_and_show("Distribuição de lead times", "Lead time", "Reservas", 45)
+print("Top 10 Lead Times:")
+print(df_lead_time.size().nlargest(10), "\n")
+
+# Bons candidatos para outliers
+print(
+    f"Lead time maior que 450: {len(df[df['lead_time'] > 450])}, {len(df[df['lead_time'] > 450]) / len(df) * 100:.2f}% do dataset"
+)
+
+# Removendo esses outliers
+print("Removendo lead time maior que 450")
+index = df[df["lead_time"] > 450].index
+df = df.drop(index)
+print(
+    f"Lead time maior que 450: {len(df[df['lead_time'] > 450])}, {len(df[df['lead_time'] > 450]) / len(df) * 100:.2f}% do dataset"
+)
+
+# Repetindo o gráfico inicial
+df_lead_time = df.groupby("lead_time")
+df_lead_time.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show("Distribuição de lead times", "Lead time", "Reservas", 45)
 
 # Como o is_canceled já está sendo codificado como 0 e 1, é possível descobrir o
 # número de cancelados com uma simples soma, sem precisar de um filtro
@@ -233,6 +253,41 @@ plot_params_and_show("Cancelamentos por mês", "Tipo do hotel", "Cancelamentos",
 df_adr = df.groupby("adr")
 df_adr.size().plot(kind="line", figsize=(20, 10))
 plot_params_and_show("Distribuição de ADR", "ADR", "Reservas", 45)
+print("Top 10 ADRs:")
+print(df_adr.size().nlargest(10), "\n")
+
+df_adr_ate_mil = df[df["adr"] <= 1000.0].groupby("adr")
+df_adr_ate_mil.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show("Distribuição de ADR até 1000", "ADR", "Reservas", 45)
+
+print(f"ADRs negativos: {len(df[df['adr'] < 0])}")
+print(f"ADRs nulos: {len(df[df['adr'] == 0])}")
+
+# O adr negativo me parece um erro então irei remover.
+# Mas adr nulo pode ser legítimo, como um hotel com todas as despesas pagas.
+print("Removendo ADR negativo")
+index = df[df["adr"] < 0].index
+df = df.drop(index)
+print(f"ADRs negativos: {len(df[df['adr'] < 0])}")
+
+# Repetindo o gráfico anterior após isso
+df_adr_ate_mil = df[df["adr"] <= 1000.0].groupby("adr")
+df_adr_ate_mil.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show(
+    "Distribuição de ADR até 1000 após limpeza de negativos", "ADR", "Reservas", 45
+)
+
+print(
+    f"ADRs maiores que 300: {len(df[df['adr'] > 300])}, {len(df[df['adr'] > 300]) / len(df) * 100:.2f}% do dataset"
+)
+
+# Agora sim, irei remover esses outliers.
+print("Removendo outliers ADR")
+index = df[df["adr"] > 300].index
+df = df.drop(index)
+print(
+    f"ADRs maiores que 300: {len(df[df['adr'] > 300])}, {len(df[df['adr'] > 300]) / len(df) * 100:.2f}% do dataset"
+)
 
 df_adr["is_canceled"].sum().plot(kind="line", figsize=(20, 10))
 plot_params_and_show("Cancelamentos por ADR", "ADR", "Cancelamentos", 45)
