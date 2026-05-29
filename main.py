@@ -294,6 +294,9 @@ df_adr = df.groupby("adr")
 df_adr.size().plot(kind="line", figsize=(20, 10))
 plot_params_and_show("Distribuição de ADR sem outliers", "ADR", "Reservas", 45)
 
+print("Top 10 ADRs com mais reservas:")
+print(df_adr.size().nlargest(10))
+
 df_adr["is_canceled"].sum().plot(kind="line", figsize=(20, 10))
 plot_params_and_show("Cancelamentos por ADR", "ADR", "Cancelamentos", 45)
 

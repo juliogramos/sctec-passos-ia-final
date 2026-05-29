@@ -52,4 +52,13 @@ O projeto foi primeiro desenvolvido em um arquivo Python, para que o código pos
 
 ### 5. Principais Insights
 
+1. Há uma correlação entre stays_in_weekend_nights com stays_in_week_nights. Isso parece meio óbvio à primeira vista mas indica que os hotéis fazem apenas (ou em maioria) reservas com dias seguidos e não intermitentes.
+2. Há uma correlação entre children e adr e adults e adr. Indica que os hotéis cobram por número de hóspedes.
+3. A maior parte dos cancelamentos é no mesmo dia, o que me surpreendeu um pouco.
+4. O número de cancelamentos tende a diminuir com o aumento de lead_time, mas não é uma curva "limpa".
+5. Os meses com mais reservas e cancelamentos são Julho e Agosto.
+6. O ADR tem um pico em 62 e após isso tende a baixar. A taxa de cancelamentos entre ADR 0 e 62 é relativamente baixa, o que é interessante.
+7. Clientes repetidos tendem a cancelar menos, e clientes que já cancelaram tendem a cancelar novamente.
+8. Clientes com mudanças na reserva e pedidos especiais tendem a cancelar menos.
+
 ### 6. Modelagem Preditiva
