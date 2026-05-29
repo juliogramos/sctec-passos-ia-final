@@ -325,7 +325,7 @@ plot_params_and_show(
 
 # 7. cancelamento por previous_cancelations
 df_previous_cancelations = df.groupby("previous_cancellations")
-df_previous_cancelations.size().plot(kind="line", figsize=(20, 10))
+df_previous_cancelations.size().plot(kind="bar")
 plot_params_and_show(
     "Distribuição de cancelamentos prévios", "Cancelamentos prévios", "Reservas", 45
 )
