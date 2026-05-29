@@ -185,7 +185,7 @@ print(
     f"Lead time maior que 450: {len(df[df['lead_time'] > 450])}, {len(df[df['lead_time'] > 450]) / len(df) * 100:.2f}% do dataset"
 )
 
-# Repetindo o gráfico inicial
+# Repetindo o gráfico inicial de lead time
 df_lead_time = df.groupby("lead_time")
 df_lead_time.size().plot(kind="line", figsize=(20, 10))
 plot_params_and_show("Distribuição de lead times", "Lead time", "Reservas", 45)
@@ -288,6 +288,11 @@ df = df.drop(index)
 print(
     f"ADRs maiores que 300: {len(df[df['adr'] > 300])}, {len(df[df['adr'] > 300]) / len(df) * 100:.2f}% do dataset"
 )
+
+# Redesenhando o gráfico inicial de ADR
+df_adr = df.groupby("adr")
+df_adr.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show("Distribuição de ADR sem outliers", "ADR", "Reservas", 45)
 
 df_adr["is_canceled"].sum().plot(kind="line", figsize=(20, 10))
 plot_params_and_show("Cancelamentos por ADR", "ADR", "Cancelamentos", 45)
