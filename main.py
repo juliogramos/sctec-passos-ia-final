@@ -28,6 +28,7 @@ print(
 # 1/4 do dataset me parece muito para remover
 # Como não há ID do cliente ou da reserva, não dá para saber se realmente são
 # reservas duplicadas ou se são reservas únicas com os mesmos parâmetros.
+# Por essas razões, decidi não remover os duplicados.
 
 print("Duplicados não serão removidos.")
 print("1/4 do dataset me parece muito para remover.")
@@ -134,9 +135,9 @@ print(
 )
 
 # Quais remover?
-# Por enquanto, não vou remover nenhum outlier, pois eles podem ter correlações
+# Por enquanto, não vou remover nenhum outlier, pois eles podem ter relações
 # importantes para a modelagem preditiva.
-# Irei checar essas correlações no próximo passo.
+# Irei checar essas relações no próximo passo.
 
 # Análise exploratória
 print("ANÁLISE EXPLORATÓRIA:")
@@ -166,27 +167,27 @@ plt.show()
 # Relações a serem examinadas:
 # 1. cancelamento por lead time
 df_lead_time = df.groupby("lead_time")
-df_lead_time.size().plot(kind="hist")
-plot_params_and_show("Distribuição de lead times", "Lead time", "Quantidade", 45)
+df_lead_time.size().plot(kind="line")
+plot_params_and_show("Distribuição de lead times", "Lead time", "Reservas", 45)
 
-df_lead_time["is_canceled"].sum().plot(kind="hist")
-plot_params_and_show("Cancelamento por lead time", "Lead time", "Cancelamento", 45)
+# Como o is_canceled já está sendo codificado como 0 e 1, é possível descobrir o
+# número de cancelados com uma simples soma, sem precisar de um filtro
+df_lead_time["is_canceled"].sum().plot(kind="line")
+plot_params_and_show("Cancelamentos por lead time", "Lead time", "Cancelamentos", 45)
 
 # 2. cancelamento por tipo de hotel
 df_tipo_hotel = df.groupby("hotel")
 df_tipo_hotel.size().plot(kind="pie")
-plot_params_and_show(
-    "Distribuição de tipos de hotel", "Tipo do hotel", "Quantidade", 45
-)
+plot_params_and_show("Distribuição de tipos de hotel", "Tipo do hotel", "Reservas", 45)
 
 df_tipo_hotel["is_canceled"].sum().plot(kind="bar")
 plot_params_and_show(
-    "Cancelamento por tipo do hotel", "Tipo do hotel", "Cancelamento", 45
+    "Cancelamentos por tipo do hotel", "Tipo do hotel", "Cancelamentos", 45
 )
 
 # 3. cancelamento por mês
 # Gambiarra para mostrar os meses em ordem no gráfico
-# Essa feature nova não vai para as features de ML
+# Essa coluna nova não vai para as features de ML
 num_para_mes_map = {
     1: "January",
     2: "February",
@@ -221,23 +222,24 @@ df["MY_mes_numero"] = df["arrival_date_month"].map(mes_para_num_map)
 
 df_meses = df.sort_values(["MY_mes_numero"], ascending=True).groupby("MY_mes_numero")
 df_meses.size().plot(kind="bar").set_xticklabels(list(num_para_mes_map.values()))
-plot_params_and_show("Distribuição de meses", "Mês", "Quantidade", 45)
+plot_params_and_show("Distribuição de meses", "Mês", "Reservas", 45)
 
 df_meses["is_canceled"].sum().plot(kind="bar").set_xticklabels(
     list(num_para_mes_map.values())
 )
-plot_params_and_show("Cancelamento por mês", "Tipo do hotel", "Cancelamento", 45)
+plot_params_and_show("Cancelamentos por mês", "Tipo do hotel", "Cancelamentos", 45)
 
 # 4. cancelamento por adr
 df_adr = df.groupby("adr")
-df_adr.size().plot(kind="hist")
-plot_params_and_show("Distribuição de ADR", "ADR", "Quantidade", 45)
+df_adr.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show("Distribuição de ADR", "ADR", "Reservas", 45)
 
-df_adr["is_canceled"].sum().plot(kind="hist")
-plot_params_and_show("Cancelamento por ADR", "ADR", "Cancelamento", 45)
+df_adr["is_canceled"].sum().plot(kind="line", figsize=(20, 10))
+plot_params_and_show("Cancelamentos por ADR", "ADR", "Cancelamentos", 45)
 
+# Não consegui ajustar o gráfico para ser mais detalhado, então:
 print("10 ADRs com mais cancelamentos:")
-print(df_adr["is_canceled"].sum().nlargest(10).head(), "\n")
+print(df_adr["is_canceled"].sum().nlargest(10), "\n")
 
 # 5. cancelamento por país
 df_paises = df.groupby("country")
@@ -250,7 +252,90 @@ plot_params_and_show(
 )
 
 # 6. cancelamento por is_repeated_guest
+df_repeated_guest = df.groupby("is_repeated_guest")
+df_repeated_guest.size().plot(kind="pie", labels=["Novos", "Repetidos"], figsize=(8, 8))
+plot_params_and_show("Distribuição de clientes repetidos", "Clientes", "Reservas", 45)
+
+df_repeated_guest["is_canceled"].sum().plot(kind="bar").set_xticklabels(
+    ["Novos", "Repetidos"]
+)
+plot_params_and_show(
+    "Cancelamentos por tipo de cliente", "Tipo do hotel", "Cancelamentos", 45
+)
+
 # 7. cancelamento por previous_cancelations
+df_previous_cancelations = df.groupby("previous_cancellations")
+df_previous_cancelations.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show(
+    "Distribuição de cancelamentos prévios", "Cancelamentos prévios", "Reservas", 45
+)
+
+df_previous_cancelations["is_canceled"].sum().plot(kind="bar")
+plot_params_and_show(
+    "Cancelamento por cancelamentos prévios",
+    "Cancelamentos prévios",
+    "Cancelamentos",
+    45,
+)
+
+# Interessante em teoria, mas é óbvio que os que tem cancelamentos prévios tem
+# mais cancelamentos.
+
+# Resolvi não analisar o previous_bookings_not_changed já que é um número
+# complementar ao previous_cancellations.
+
 # 8. cancelamento por booking_changes
+df_booking_changes = df.groupby("booking_changes")
+df_booking_changes.size().plot(kind="bar")
+plot_params_and_show(
+    "Distribuição de mudanças na reserva", "Mudanças na reserva", "Reservas", 45
+)
+
+df_booking_changes["is_canceled"].sum().plot(kind="bar")
+plot_params_and_show(
+    "Cancelamento por mudanças na reserva",
+    "Mudanças na reserva",
+    "Cancelamentos",
+    45,
+)
+
+# Bem interessante e com sentido.
+
 # 9. cancelamento por days_in_waiting_list
-# 9. cancelamento por total_of special requests
+df_waiting_list = df.groupby("days_in_waiting_list")
+df_waiting_list.size().plot(kind="line", figsize=(20, 10))
+plot_params_and_show(
+    "Distribuição de dias na lista de espera", "Dias na lista de espera", "Reservas", 45
+)
+print("10 nº de dias na lista de espera mais comuns:")
+print(df_waiting_list.size().nlargest(10), "\n")
+
+df_waiting_list["is_canceled"].sum().plot(kind="line", figsize=(20, 10))
+plot_params_and_show(
+    "Cancelamento por dias na lista de espera",
+    "Dias na lista de espera",
+    "Cancelamentos",
+    45,
+)
+print("10 nº de dias na lista de espera com mais cancelamentos:")
+print(df_waiting_list["is_canceled"].sum().nlargest(10))
+
+# Interessante, a maioria dos cancelamentos é imediato
+
+# 10. cancelamento por total_of special requests
+df_special_requests = df.groupby("total_of_special_requests")
+df_special_requests.size().plot(kind="bar")
+plot_params_and_show(
+    "Distribuição de total de pedidos especiais",
+    "Total de pedidos especiais",
+    "Reservas",
+    45,
+)
+
+df_special_requests["is_canceled"].sum().plot(kind="bar")
+plot_params_and_show(
+    "Cancelamento por total de pedidos especiais",
+    "Total de pedidos especiais",
+    "Cancelamentos",
+    45,
+)
