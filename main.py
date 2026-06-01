@@ -2,6 +2,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    roc_auc_score,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
@@ -407,7 +416,7 @@ plot_params_and_show(
 )
 
 # Modelagem Preditiva
-# Criação de features baseadas nas correlações encontradas
+# Feature Engineering
 # Todas as features criadas por mim terão o prefixo MY
 print("CRIANDO NOVAS FEATURES (prefixo MY)")
 
@@ -428,6 +437,7 @@ print("REMOVENDO FEATURES")
 
 # Removendo o Target
 categoric_features.remove("is_canceled")
+categoric_features.remove("reservation_status")
 print("TARGET (is_canceled) removido")
 
 # Removendo o ano
@@ -496,4 +506,81 @@ print("RECONSTITUINDO DATAFRAME")
 X_train_df = pd.DataFrame(X_train_processed, columns=feature_names)  # type: ignore
 X_train_df.index = X_train.index
 print("Datarframe reconstituído")
-print(X_train_df.head())
+print(X_train_df.head(), "\n")
+
+# Treinando modelos (supervisionados)
+print("TREINANDO MODELOS (supervisionados)", "\n")
+metricas = {}
+
+# Modelo 1: Regressão Logística
+print("Modelo 1: Regressão Logística")
+model_lr = LogisticRegression(random_state=5, solver="liblinear", max_iter=1000)
+model_lr.fit(X_train_processed, y_train)
+y_pred_lr = model_lr.predict(X_test_processed)
+y_proba_lr = model_lr.predict_proba(X_test_processed)[:, 1]
+metricas["Regressão Logística"] = {
+    "Accuracy": accuracy_score(y_test, y_pred_lr),
+    "AUC": roc_auc_score(y_test, y_proba_lr),
+}
+print("Treinamento de regressão logística concluído", "\n")
+
+# Modelo 2: Random Forest
+print("Modelo 2: Random Forest")
+model_rf = RandomForestClassifier(
+    n_estimators=100, max_depth=10, random_state=5, n_jobs=1
+)
+model_rf.fit(X_train_processed, y_train)
+y_pred_rf = model_rf.predict(X_test_processed)
+y_proba_rf = model_rf.predict_proba(X_test_processed)[:, 1]
+
+metricas["Random Forest"] = {
+    "Accuracy": accuracy_score(y_test, y_pred_rf),
+    "AUC": roc_auc_score(y_test, y_proba_rf),
+}
+print("Treinamento de Random Forest concluído", "\n")
+
+# Resultados
+print("RESULTADOS")
+
+# Regressão Logística
+print("Resultado: Regressão Logística")
+print(
+    classification_report(
+        y_test, y_pred_lr, target_names=["Completed (0)", "Cancelled (1)"]
+    ),
+    "\n",
+)
+cm_lr = confusion_matrix(y_test, y_pred_lr)
+ConfusionMatrixDisplay(confusion_matrix=cm_lr).plot()
+plot_params_and_show(
+    "Matriz de Confusão - Regressão Logística",
+    "Resultado obtido",
+    "Resultado esperado",
+    0,
+)
+
+# Random Forest
+print("Resultado: Random Forest")
+print(
+    classification_report(
+        y_test, y_pred_rf, target_names=["Completed (0)", "Cancelled (1)"]
+    ),
+    "\n",
+)
+
+cm_rf = confusion_matrix(y_test, y_pred_rf)
+ConfusionMatrixDisplay(confusion_matrix=cm_rf).plot()
+plot_params_and_show(
+    "Matriz de Confusão - Random Forest",
+    "Resultado obtido",
+    "Resultado esperado",
+    0,
+)
+
+# Comparação entre modelos
+print("COMPARAÇÃO ENTRE MODELOS")
+df_comparacao = pd.DataFrame(metricas).T
+print(df_comparacao)
+
+print(f"\nMelhor Performance (AUC): {df_comparacao['AUC'].idxmax()}")
+print(f"Melhor AUC: {df_comparacao['AUC'].max():.4f}")
