@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from utilitarios import outlier_calc, plot_params_and_show, ver_tabela_nulos
 
@@ -113,7 +116,7 @@ for i, col in enumerate(numeric_features):
     axs[i].set_xlabel("")
 
 plt.tight_layout()
-plt.show()
+# plt.show()
 
 # À primeira vista, apenas o total_of_special_requests é um bom candidato para
 # a remoção de outliers
@@ -158,7 +161,7 @@ sns.heatmap(
     cbar=True,
 )
 plt.title("Matriz de correlação de features numéricas")
-plt.show()
+# plt.show()
 
 # Correlações interessantes encontradas:
 # 1. stays_in_weekend_nights com stays_in_week_nights
@@ -381,7 +384,7 @@ plot_params_and_show(
     45,
 )
 print("10 nº de dias na lista de espera com mais cancelamentos:")
-print(df_waiting_list["is_canceled"].sum().nlargest(10))
+print(df_waiting_list["is_canceled"].sum().nlargest(10), "\n")
 
 # Interessante, a maioria dos cancelamentos é imediato
 
@@ -402,3 +405,95 @@ plot_params_and_show(
     "Cancelamentos",
     45,
 )
+
+# Modelagem Preditiva
+# Criação de features baseadas nas correlações encontradas
+# Todas as features criadas por mim terão o prefixo MY
+print("CRIANDO NOVAS FEATURES (prefixo MY)")
+
+print("HÓSPEDES TOTAIS")
+df["MY_total_guests"] = df["adults"] + df["children"] + df["babies"]
+print(df["MY_total_guests"], "\n")
+
+print("ESTADIA TOTAL")
+df["MY_total_nights"] = df["stays_in_weekend_nights"] + df["stays_in_week_nights"]
+print(df["MY_total_nights"], "\n")
+
+print("ADICIONANDO FEATURES À LISTA", "\n")
+numeric_features.append("MY_total_guests")
+numeric_features.append("MY_total_nights")
+
+# Removendo Features
+print("REMOVENDO FEATURES")
+
+# Removendo o Target
+categoric_features.remove("is_canceled")
+print("TARGET (is_canceled) removido")
+
+# Removendo o ano
+# Não acho que o ano seja um bom valor para incluir, primeiro por que supostamente
+# vamos usar o modelo para prever valores futuros, e as variáveis que fazem que
+# um ano seja diferente do outro são inúmeras e fora do escopo dos dados.
+categoric_features.remove("arrival_date_year")
+print("Ano (arrival_date_year) removido")
+
+# Removendo o dia do mês
+# Não acho que seja útil, acho que o dia da semana seria mais útil mas não é
+# um dado incluído no dataset
+categoric_features.remove("arrival_date_day_of_month")
+print("Dia do mês (arrival_date_day_of_month) removido", "\n")
+
+
+print("SEPARANDO FEATURES PARA O MODELO")
+FEATURES = numeric_features + categoric_features
+TARGET = "is_canceled"
+print(f"FEATURES: {FEATURES}")
+print(f"TARGET: {TARGET}", "\n")
+
+print("CRIANDO CÓPIA DO DATAFRAME")
+df_ml = df[FEATURES + [TARGET]].copy()
+
+print("VALIDANDO NOVO DATAFRAME")
+print(df_ml.info())
+print("NOVO DATAFRAME É VÁLIDO", "\n")
+
+# Separação de dados de treino e teste
+print("SEPARAÇÃO DE DADOS DE TREINO E TESTE")
+X = df_ml.drop(TARGET, axis=1)
+y = df_ml[TARGET]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=5, stratify=y
+)
+print("DADOS SEPARADOS ENTRE TREINO E TESTE")
+
+# Pré-processamento dos dados
+print("PRÉ-PROCESSAMENTO DOS DADOS")
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", StandardScaler(), numeric_features),
+        (
+            "cat",
+            OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+            categoric_features,
+        ),
+    ],
+    remainder="drop",
+)
+
+X_train_processed = preprocessor.fit_transform(X_train)
+X_test_processed = preprocessor.transform(X_test)
+feature_names = preprocessor.get_feature_names_out()
+
+print("PRÉ-PROCESSAMENTO CONCLUÍDO")
+print(f"Shape de X_train_processed: {X_train_processed.shape}")
+print(f"Shape de X_test_processed: {X_test_processed.shape}")
+print(f"Total de novas colunas: {len(feature_names)}", "\n")
+
+# Reconstituindo Dataframe
+print("RECONSTITUINDO DATAFRAME")
+X_train_df = pd.DataFrame(X_train_processed, columns=feature_names)  # type: ignore
+X_train_df.index = X_train.index
+print("Datarframe reconstituído")
+print(X_train_df.head())
