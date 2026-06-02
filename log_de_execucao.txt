@@ -1,0 +1,347 @@
+VISUALIZAÇÃO INICIAL DOS DADOS:
+          hotel  is_canceled  lead_time  ...  total_of_special_requests reservation_status  reservation_status_date
+0  Resort Hotel            0        342  ...                          0          Check-Out               2015-07-01
+1  Resort Hotel            0        737  ...                          0          Check-Out               2015-07-01
+2  Resort Hotel            0          7  ...                          0          Check-Out               2015-07-02
+3  Resort Hotel            0         13  ...                          0          Check-Out               2015-07-02
+4  Resort Hotel            0         14  ...                          1          Check-Out               2015-07-03
+
+[5 rows x 32 columns] 
+
+VISUALIZAÇÃO DOS TIPOS DE DADOS:
+<class 'pandas.DataFrame'>
+RangeIndex: 119390 entries, 0 to 119389
+Data columns (total 32 columns):
+ #   Column                          Non-Null Count   Dtype  
+---  ------                          --------------   -----  
+ 0   hotel                           119390 non-null  str    
+ 1   is_canceled                     119390 non-null  int64  
+ 2   lead_time                       119390 non-null  int64  
+ 3   arrival_date_year               119390 non-null  int64  
+ 4   arrival_date_month              119390 non-null  str    
+ 5   arrival_date_week_number        119390 non-null  int64  
+ 6   arrival_date_day_of_month       119390 non-null  int64  
+ 7   stays_in_weekend_nights         119390 non-null  int64  
+ 8   stays_in_week_nights            119390 non-null  int64  
+ 9   adults                          119390 non-null  int64  
+ 10  children                        119386 non-null  float64
+ 11  babies                          119390 non-null  int64  
+ 12  meal                            119390 non-null  str    
+ 13  country                         118902 non-null  str    
+ 14  market_segment                  119390 non-null  str    
+ 15  distribution_channel            119390 non-null  str    
+ 16  is_repeated_guest               119390 non-null  int64  
+ 17  previous_cancellations          119390 non-null  int64  
+ 18  previous_bookings_not_canceled  119390 non-null  int64  
+ 19  reserved_room_type              119390 non-null  str    
+ 20  assigned_room_type              119390 non-null  str    
+ 21  booking_changes                 119390 non-null  int64  
+ 22  deposit_type                    119390 non-null  str    
+ 23  agent                           103050 non-null  float64
+ 24  company                         6797 non-null    float64
+ 25  days_in_waiting_list            119390 non-null  int64  
+ 26  customer_type                   119390 non-null  str    
+ 27  adr                             119390 non-null  float64
+ 28  required_car_parking_spaces     119390 non-null  int64  
+ 29  total_of_special_requests       119390 non-null  int64  
+ 30  reservation_status              119390 non-null  str    
+ 31  reservation_status_date         119390 non-null  str    
+dtypes: float64(4), int64(16), str(12)
+memory usage: 29.1 MB
+None 
+
+TRATAMENTO DE DUPLICADOS:
+Duplicados encontrados: 31994, 26.80% do dataset
+Duplicados não serão removidos.
+1/4 do dataset me parece muito para remover.
+Como não há ID do cliente ou da reserva, não dá para saber se realmente são reservas duplicadas ou se são reservas únicas com os mesmos parâmetros. 
+
+VERIFICAÇÃO DE NULOS:
+Nulos encontrados:
+          Total nulos  Percentual (%)
+company        112593           94.31
+agent           16340           13.69
+country           488            0.41
+children            4            0.00 
+
+TRATAMENTO DE NULOS:
+Os nulos de company serão preenchidos por uma nova categoria -1.
+Nulos restantes em company: 0 
+
+Os nulos de agent serão preenchidos por uma nova categoria -1.
+Nulos restantes em agent: 0 
+
+Removendo nulos de country e children.
+Nulos restantes:
+Empty DataFrame
+Columns: [Total nulos, Percentual (%)]
+Index: [] 
+
+IDENTIFICANDO OUTLIERS POR IQR:
+                                Total outliers  Percentual (%)
+adults                                   29403       24.729600
+booking_changes                          17996       15.135663
+children                                  8579        7.215428
+required_car_parking_spaces               7310        6.148127
+previous_cancellations                    6447        5.422295
+adr                                       3883        3.265824
+days_in_waiting_list                      3698        3.110229
+previous_bookings_not_canceled            3397        2.857071
+stays_in_week_nights                      3341        2.809972
+lead_time                                 2982        2.508032
+total_of_special_requests                 2864        2.408787
+babies                                     914        0.768726
+stays_in_weekend_nights                    263        0.221198
+Total de outliers: 91077, 76.60 do dataset. 
+
+ANÁLISE EXPLORATÓRIA:
+Matriz de correlação:
+                                lead_time  ...  total_of_special_requests
+lead_time                          1.0000  ...                    -0.0965
+stays_in_weekend_nights            0.0840  ...                     0.0717
+stays_in_week_nights               0.1648  ...                     0.0668
+adults                             0.1168  ...                     0.1218
+children                          -0.0383  ...                     0.0818
+babies                            -0.0211  ...                     0.0976
+previous_cancellations             0.0860  ...                    -0.0486
+previous_bookings_not_canceled    -0.0711  ...                     0.0376
+booking_changes                    0.0000  ...                     0.0524
+days_in_waiting_list               0.1700  ...                    -0.0830
+adr                               -0.0664  ...                     0.1715
+required_car_parking_spaces       -0.1156  ...                     0.0827
+total_of_special_requests         -0.0965  ...                     1.0000
+
+[13 rows x 13 columns] 
+
+Top 10 Lead Times:
+lead_time
+0     6223
+1     3393
+2     2033
+3     1802
+4     1696
+5     1545
+6     1422
+7     1310
+8     1124
+12    1074
+dtype: int64 
+
+Lead time maior que 450: 1106, 0.93% do dataset
+Removendo lead time maior que 450
+Lead time maior que 450: 0, 0.00% do dataset
+Top 10 ADRs:
+adr
+62.0     3438
+75.0     2710
+65.0     2367
+90.0     2355
+0.0      1926
+80.0     1878
+95.0     1660
+120.0    1607
+100.0    1573
+85.0     1538
+dtype: int64 
+
+ADRs negativos: 1
+ADRs nulos: 1926
+Removendo ADR negativo
+ADRs negativos: 0
+ADRs maiores que 300: 275, 0.23% do dataset
+Removendo outliers ADR
+ADRs maiores que 300: 0, 0.00% do dataset
+Top 10 ADRs com mais reservas:
+adr
+62.0     3438
+75.0     2710
+65.0     2367
+90.0     2355
+0.0      1926
+80.0     1878
+95.0     1660
+120.0    1607
+100.0    1573
+85.0     1538
+dtype: int64
+10 ADRs com mais cancelamentos:
+adr
+62.0     2713
+90.0     1385
+75.0     1206
+80.0     1062
+120.0    1004
+110.0     979
+100.0     978
+130.0     866
+65.0      734
+95.0      720
+Name: is_canceled, dtype: int64 
+
+10 nº de dias na lista de espera mais comuns:
+days_in_waiting_list
+0     113852
+39       227
+58       164
+44       141
+31       127
+35        96
+46        94
+69        89
+63        83
+50        80
+dtype: int64 
+
+10 nº de dias na lista de espera com mais cancelamentos:
+days_in_waiting_list
+0     40899
+39      227
+31      126
+44      112
+35       94
+46       93
+69       73
+45       65
+41       63
+62       60
+Name: is_canceled, dtype: int64 
+
+CRIANDO NOVAS FEATURES (prefixo MY)
+HÓSPEDES TOTAIS
+0         2.0
+2         1.0
+3         1.0
+4         2.0
+5         2.0
+         ... 
+119385    2.0
+119386    3.0
+119387    2.0
+119388    2.0
+119389    2.0
+Name: MY_total_guests, Length: 117516, dtype: float64 
+
+ESTADIA TOTAL
+0         0
+2         1
+3         1
+4         2
+5         2
+         ..
+119385    7
+119386    7
+119387    7
+119388    7
+119389    9
+Name: MY_total_nights, Length: 117516, dtype: int64 
+
+ADICIONANDO FEATURES À LISTA 
+
+REMOVENDO FEATURES
+TARGET (is_canceled) removido
+Ano (arrival_date_year) removido
+Dia do mês (arrival_date_day_of_month) removido 
+
+SEPARANDO FEATURES PARA O MODELO
+FEATURES: ['lead_time', 'stays_in_weekend_nights', 'stays_in_week_nights', 'adults', 'children', 'babies', 'previous_cancellations', 'previous_bookings_not_canceled', 'booking_changes', 'days_in_waiting_list', 'adr', 'required_car_parking_spaces', 'total_of_special_requests', 'MY_total_guests', 'MY_total_nights', 'hotel', 'arrival_date_month', 'arrival_date_week_number', 'meal', 'country', 'market_segment', 'distribution_channel', 'is_repeated_guest', 'reserved_room_type', 'assigned_room_type', 'deposit_type', 'agent', 'company', 'customer_type']
+TARGET: is_canceled 
+
+CRIANDO CÓPIA DO DATAFRAME
+VALIDANDO NOVO DATAFRAME
+<class 'pandas.DataFrame'>
+Index: 117516 entries, 0 to 119389
+Data columns (total 30 columns):
+ #   Column                          Non-Null Count   Dtype  
+---  ------                          --------------   -----  
+ 0   lead_time                       117516 non-null  int64  
+ 1   stays_in_weekend_nights         117516 non-null  int64  
+ 2   stays_in_week_nights            117516 non-null  int64  
+ 3   adults                          117516 non-null  int64  
+ 4   children                        117516 non-null  float64
+ 5   babies                          117516 non-null  int64  
+ 6   previous_cancellations          117516 non-null  int64  
+ 7   previous_bookings_not_canceled  117516 non-null  int64  
+ 8   booking_changes                 117516 non-null  int64  
+ 9   days_in_waiting_list            117516 non-null  int64  
+ 10  adr                             117516 non-null  float64
+ 11  required_car_parking_spaces     117516 non-null  int64  
+ 12  total_of_special_requests       117516 non-null  int64  
+ 13  MY_total_guests                 117516 non-null  float64
+ 14  MY_total_nights                 117516 non-null  int64  
+ 15  hotel                           117516 non-null  str    
+ 16  arrival_date_month              117516 non-null  str    
+ 17  arrival_date_week_number        117516 non-null  int64  
+ 18  meal                            117516 non-null  str    
+ 19  country                         117516 non-null  str    
+ 20  market_segment                  117516 non-null  str    
+ 21  distribution_channel            117516 non-null  str    
+ 22  is_repeated_guest               117516 non-null  int64  
+ 23  reserved_room_type              117516 non-null  str    
+ 24  assigned_room_type              117516 non-null  str    
+ 25  deposit_type                    117516 non-null  str    
+ 26  agent                           117516 non-null  float64
+ 27  company                         117516 non-null  float64
+ 28  customer_type                   117516 non-null  str    
+ 29  is_canceled                     117516 non-null  int64  
+dtypes: float64(5), int64(15), str(10)
+memory usage: 27.8 MB
+None
+NOVO DATAFRAME É VÁLIDO 
+
+SEPARAÇÃO DE DADOS DE TREINO E TESTE
+DADOS SEPARADOS ENTRE TREINO E TESTE
+PRÉ-PROCESSAMENTO DOS DADOS
+PRÉ-PROCESSAMENTO CONCLUÍDO
+Shape de X_train_processed: (94012, 946)
+Shape de X_test_processed: (23504, 946)
+Total de novas colunas: 946 
+
+RECONSTITUINDO DATAFRAME
+Datarframe reconstituído
+       num__lead_time  ...  cat__customer_type_Transient-Party
+17002        1.381726  ...                                 1.0
+13029        1.601722  ...                                 0.0
+47132       -0.598243  ...                                 0.0
+780         -0.608243  ...                                 0.0
+89740        0.621738  ...                                 0.0
+
+[5 rows x 946 columns] 
+
+TREINANDO MODELOS (supervisionados) 
+
+Modelo 1: Regressão Logística
+Treinamento de regressão logística concluído 
+
+Modelo 2: Random Forest
+Treinamento de Random Forest concluído 
+
+RESULTADOS
+Resultado: Regressão Logística
+               precision    recall  f1-score   support
+
+Completed (0)       0.84      0.90      0.87     14858
+Cancelled (1)       0.81      0.71      0.76      8646
+
+     accuracy                           0.83     23504
+    macro avg       0.83      0.81      0.82     23504
+ weighted avg       0.83      0.83      0.83     23504
+ 
+
+Resultado: Random Forest
+               precision    recall  f1-score   support
+
+Completed (0)       0.74      0.99      0.85     14858
+Cancelled (1)       0.97      0.40      0.56      8646
+
+     accuracy                           0.77     23504
+    macro avg       0.86      0.70      0.71     23504
+ weighted avg       0.82      0.77      0.74     23504
+ 
+
+COMPARAÇÃO ENTRE MODELOS
+                     Accuracy       AUC
+Regressão Logística  0.834879  0.914471
+Random Forest        0.773953  0.908349
+
+Melhor Performance (AUC): Regressão Logística
+Melhor AUC: 0.9145

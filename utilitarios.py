@@ -29,5 +29,4 @@ def plot_params_and_show(title: str, xlabel: str, ylabel: str, rotation: int):
     plt.ylabel(ylabel)
     plt.xticks(rotation=rotation)
 
-
-# plt.show()
+    plt.show()

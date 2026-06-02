@@ -125,7 +125,7 @@ for i, col in enumerate(numeric_features):
     axs[i].set_xlabel("")
 
 plt.tight_layout()
-# plt.show()
+plt.show()
 
 # À primeira vista, apenas o total_of_special_requests é um bom candidato para
 # a remoção de outliers
@@ -170,7 +170,7 @@ sns.heatmap(
     cbar=True,
 )
 plt.title("Matriz de correlação de features numéricas")
-# plt.show()
+plt.show()
 
 # Correlações interessantes encontradas:
 # 1. stays_in_weekend_nights com stays_in_week_nights
