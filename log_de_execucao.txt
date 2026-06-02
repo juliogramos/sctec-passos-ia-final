@@ -337,6 +337,8 @@ Cancelled (1)       0.97      0.40      0.56      8646
     macro avg       0.86      0.70      0.71     23504
  weighted avg       0.82      0.77      0.74     23504
  
+Recall para cancelamento (1) - Regressão Logística: 0.7146
+Recall para cancelamento (1) - Random Forest: 0.3969 
 
 COMPARAÇÃO ENTRE MODELOS
                      Accuracy       AUC

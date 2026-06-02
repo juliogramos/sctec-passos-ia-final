@@ -8,6 +8,7 @@ from sklearn.metrics import (
     accuracy_score,
     classification_report,
     confusion_matrix,
+    recall_score,
     roc_auc_score,
     roc_curve,
 )
@@ -587,6 +588,13 @@ plt.title("Matriz de Confusão (Random Forest)")
 plt.ylabel("Valores Reais")
 plt.xlabel("Valores Previstos")
 plt.show()
+
+# Recall
+recall_lr = recall_score(y_test, y_pred_lr, pos_label=1)
+print(f"Recall para cancelamento (1) - Regressão Logística: {recall_lr:.4f}")
+
+recall_rf = recall_score(y_test, y_pred_rf, pos_label=1)
+print(f"Recall para cancelamento (1) - Random Forest: {recall_rf:.4f}", "\n")
 
 # Comparação entre modelos
 print("COMPARAÇÃO ENTRE MODELOS")
