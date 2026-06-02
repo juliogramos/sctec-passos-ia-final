@@ -6,7 +6,7 @@ Elaborado por [Julio Gonçalves Ramos](https://www.linkedin.com/in/julio-ramos-1
 
 Link para o repositório: [https://github.com/juliogramos/sctec-passos-ia-final](https://github.com/juliogramos/sctec-passos-ia-final)
 
-Link para o Notebook: TBD
+Link para o Notebook: [https://colab.research.google.com/drive/1Ybww0HESAxJa87vBnbPjoS0WE38JY0u7?usp=sharing](https://colab.research.google.com/drive/1Ybww0HESAxJa87vBnbPjoS0WE38JY0u7?usp=sharing)
 
 ## Tecnologias
 
