@@ -5,11 +5,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    ConfusionMatrixDisplay,
     accuracy_score,
     classification_report,
     confusion_matrix,
     roc_auc_score,
+    roc_curve,
 )
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -550,14 +550,20 @@ print(
     ),
     "\n",
 )
-cm_lr = confusion_matrix(y_test, y_pred_lr)
-ConfusionMatrixDisplay(confusion_matrix=cm_lr).plot()
-plot_params_and_show(
-    "Matriz de Confusão - Regressão Logística",
-    "Resultado obtido",
-    "Resultado esperado",
-    0,
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(
+    confusion_matrix(y_test, y_pred_lr),
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=["Previsto: Não Cancela (0)", "Previsto: Cancela (1)"],
+    yticklabels=["Real: Não Cancela (0)", "Real: Cancela (1)"],
 )
+plt.title("Matriz de Confusão (Regressão Logística)")
+plt.ylabel("Valores Reais")
+plt.xlabel("Valores Previstos")
+plt.show()
 
 # Random Forest
 print("Resultado: Random Forest")
@@ -568,14 +574,19 @@ print(
     "\n",
 )
 
-cm_rf = confusion_matrix(y_test, y_pred_rf)
-ConfusionMatrixDisplay(confusion_matrix=cm_rf).plot()
-plot_params_and_show(
-    "Matriz de Confusão - Random Forest",
-    "Resultado obtido",
-    "Resultado esperado",
-    0,
+plt.figure(figsize=(6, 5))
+sns.heatmap(
+    confusion_matrix(y_test, y_pred_rf),
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=["Previsto: Não Cancela (0)", "Previsto: Cancela (1)"],
+    yticklabels=["Real: Não Cancela (0)", "Real: Cancela (1)"],
 )
+plt.title("Matriz de Confusão (Random Forest)")
+plt.ylabel("Valores Reais")
+plt.xlabel("Valores Previstos")
+plt.show()
 
 # Comparação entre modelos
 print("COMPARAÇÃO ENTRE MODELOS")
@@ -584,3 +595,20 @@ print(df_comparacao)
 
 print(f"\nMelhor Performance (AUC): {df_comparacao['AUC'].idxmax()}")
 print(f"Melhor AUC: {df_comparacao['AUC'].max():.4f}")
+
+# Curva ROC
+fpr_lr, tpr_lr, _ = roc_curve(y_test, y_proba_lr)
+fpr_rf, tpr_rf, _ = roc_curve(y_test, y_proba_rf)
+auc_lr_val = roc_auc_score(y_test, y_proba_lr)
+auc_rf_val = roc_auc_score(y_test, y_proba_rf)
+
+plt.figure(figsize=(8, 6))
+plt.plot(fpr_lr, tpr_lr, label=f"Regressão Logística (AUC = {auc_lr_val:.2f})")
+plt.plot(fpr_rf, tpr_rf, label=f"Random Forest (AUC = {auc_rf_val:.2f})")
+plt.plot([0, 1], [0, 1], "k--", label="Chute Aleatório (AUC = 0.50)")  # Linha de base
+plt.xlabel("Taxa de Falsos Positivos (FPR)")
+plt.ylabel("Taxa de Verdadeiros Positivos (TPR) / Recall")
+plt.title("Curva ROC para Previsão de Cancelamento")
+plt.legend()
+plt.grid(True)
+plt.show()
